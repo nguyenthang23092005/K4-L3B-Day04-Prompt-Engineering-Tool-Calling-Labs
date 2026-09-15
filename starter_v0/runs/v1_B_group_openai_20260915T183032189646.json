@@ -1,0 +1,477 @@
+{
+  "run_id": "v1_B_group_openai_20260915T183032189646",
+  "version": "v1",
+  "artifact_version": "v1+p27467914bc4d+td4848549884e",
+  "prompt_hash": "27467914bc4d93574eb1a418b77247c51682e04401c78fb4445c22b9019185a0",
+  "tools_hash": "d4848549884eb9613313a2a8dec5faca4e8299842790ac2d42a04195b4da3198",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "D:\\K4-L3B-Day04-Prompt-Engineering-Tool-Calling-Labs\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\K4-L3B-Day04-Prompt-Engineering-Tool-Calling-Labs\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day04_v3_helpdesk_group",
+  "dataset_role": "group",
+  "description": "Team-authored group eval: 5 single-turn and 5 multi-turn cases covering parallel service checks, KB routing, environment validation, asset-context disambiguation, policy lookup, asset fill, tool switching, correction with carry, confirmation boundary, and tool abandonment.",
+  "generated_at": "2026-09-15T18:30:32",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 0,
+    "provider_error_cases": 10,
+    "passed_cases": 0,
+    "case_accuracy": 0.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "G01_compare_two_services_same_env",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "parallel_status_checks",
+        "difficulty": "hard",
+        "what_it_tests": "Hai service cùng environment, cùng tool gọi 2 lần. Baseline one-tool rule sẽ miss một service."
+      },
+      "input": "VPN và email trên production đang thế nào? Kiểm tra cả hai.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "vpn",
+              "environment": "production"
+            }
+          },
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "email",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G02_kb_printer_guide_routing",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_howto_printer",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu 'hướng dẫn' đi KB, không đi status hay inspect máy."
+      },
+      "input": "Tìm hướng dẫn xử lý lỗi máy in không nhận lệnh in.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "printing"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G03_sso_staging_instead_of_production",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "environment_enum_validation",
+        "difficulty": "medium",
+        "what_it_tests": "User nói 'dev' nhưng enum hợp lệ là staging/production. Phải hỏi hoặc map đúng."
+      },
+      "input": "Kiểm tra SSO trên môi trường dev giúp tôi.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G04_device_not_owned_by_mentioned_user",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "asset_context_not_ownership",
+        "difficulty": "hard",
+        "what_it_tests": "DT-087 được nhắc RÕ trong query nhưng EMP-1004 không sở hữu nó (users.json: Dung Pham không có asset). Phải dùng asset ID từ query, không lookup user."
+      },
+      "input": "Dung Pham (EMP-1004) báo máy DT-087 đang lỗi. Kiểm tra security trên máy đó.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G05_policy_incident_classification",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_policy",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu policy → dùng policy tool, không search_kb hay status."
+      },
+      "input": "Tôi cần biết incident nào được xếp loại critical và quy trình xử lý ra sao.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "incident_response"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M01_clarify_asset_then_inspect_network",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_asset_fill",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt 1 không có asset → clarification. Lượt 2 cung cấp MB-012. Lượt 3 dùng asset và check mới nhất."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Máy của Linh Do đang không lên mạng."
+        },
+        {
+          "role": "user",
+          "content": "Mã máy là MB-012."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ kiểm tra network, giữ mã đó."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "MB-012",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M02_status_to_kb_intent_change",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_intent_override",
+        "difficulty": "hard",
+        "what_it_tests": "Latest intent hoàn toàn thay thế yêu cầu cũ. Phải dùng KB, không status."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Wi-Fi production có vấn đề gì không?"
+        },
+        {
+          "role": "user",
+          "content": "Thôi không cần status nữa, tìm hướng dẫn khắc phục Wi-Fi."
+        },
+        {
+          "role": "user",
+          "content": "Hướng dẫn cho Windows thôi."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "wifi"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M03_correct_service_carry_env",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_correct_and_carry",
+        "difficulty": "hard",
+        "what_it_tests": "Service thay đổi (SSO→wifi), environment được carry từ lượt trước (production→staging). Agent phải update service mới, giữ environment mới."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Kiểm tra SSO trên production giúp tôi."
+        },
+        {
+          "role": "user",
+          "content": "À nhầm, kiểm tra Wi-Fi trên staging thôi."
+        },
+        {
+          "role": "user",
+          "content": "Vẫn staging, đúng rồi."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M04_ticket_edit_then_confirm",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_confirmation_boundary",
+        "difficulty": "hard",
+        "what_it_tests": "create_ticket là write action → luôn cần confirmation. User edit payload nhiều lần nhưng final action vẫn phải dừng ở clarify."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tạo ticket cho LT-240 lỗi network, mức medium."
+        },
+        {
+          "role": "user",
+          "content": "Đổi thành printer PR-404 và mức high."
+        },
+        {
+          "role": "user",
+          "content": "Mình muốn bạn hỏi xác nhận trước khi tạo."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M05_user_lookup_then_device_only",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_abandon_previous_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt 1 lookup user bị cancel. Lượt 2–3 hoàn toàn mới: inspect_device VPN cho MB-012. Không gọi lookup_user."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tra tài khoản EMP-1008."
+        },
+        {
+          "role": "user",
+          "content": "Không cần tài khoản nữa. Kiểm tra VPN trên MB-012 thôi."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ kiểm tra VPN."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "MB-012",
+              "check": "vpn"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENAI_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    }
+  ]
+}
