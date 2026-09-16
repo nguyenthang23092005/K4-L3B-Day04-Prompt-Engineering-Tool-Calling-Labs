@@ -18,12 +18,12 @@ tools:
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Tìm hướng dẫn hỗ trợ kỹ thuật. Luôn set `category` theo chủ đề người dùng hỏi: VPN→vpn, Outlook/email→email, Wi-Fi→wifi, in ấn→printing, tài khoản/mật khẩu→account, bảo mật→security, phần cứng→hardware, phần mềm→software, phòng họp→meeting_room. Chỉ dùng `all` khi không xác định được nhóm."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
-        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
+        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn, bắt buộc chọn theo chủ đề"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
@@ -37,16 +37,16 @@ tools:
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Kiểm tra thông tin và chẩn đoán thiết bị. Luôn set `check` rõ ràng theo vấn đề người dùng nêu: VPN→vpn, mạng/Wi-Fi→network, bảo mật→security, phần cứng→hardware, phần mềm→software; 'tổng thể' hoặc yêu cầu kiểm tra toàn bộ→all. Không bỏ trống `check`."
     parameters:
       type: object
       properties:
         asset_id: {type: string, description: "Mã tài sản"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra, bắt buộc chọn theo vấn đề"}
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Tra cứu người dùng trong danh bạ hỗ trợ. Kết quả trả về chứa asset ID của thiết bị được cấp; nếu cần kiểm tra thiết bị, dùng đúng asset ID từ kết quả này, không bao giờ dùng employee ID làm asset ID."
     parameters:
       type: object
       properties:
@@ -96,7 +96,7 @@ tools:
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    description: "Tạo một ticket hỗ trợ. Đây là hành động ghi dữ liệu: không bao giờ gọi tool này trước khi người dùng xác nhận. Phải hiện payload (summary, priority, asset_id) và hỏi xác nhận bằng clarify yes_no trước; chỉ gọi create_ticket sau khi người dùng trả lời yes cho đúng payload đó. Nếu payload thay đổi sau khi xác nhận, phải hỏi lại. Nếu người dùng đã mô tả sự cố, mức ưu tiên và tài sản trong yêu cầu, dùng chính mô tả đó làm summary và hỏi xác nhận yes_no luôn, không hỏi lại chi tiết."
     parameters:
       type: object
       properties:
