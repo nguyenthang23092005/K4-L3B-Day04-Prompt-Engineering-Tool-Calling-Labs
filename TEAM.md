@@ -47,29 +47,28 @@ Sao chép mục này cho từng thành viên.
 
 ---
 
-### Lê Đức Hùng — 2A202602849
+### Nguyễn Văn Thăng — 2A202602835
 
 - **Phần việc và file/commit/PR:**
-  - Phụ trách v2: sửa `system_prompt.md` theo giả thuyết #2, thêm mục Write actions and confirmation
-  - Chạy v2 và so sánh với v1: +2 case (23→25/30), `multiturn_accuracy` lên 1.0
-  - Đề xuất giả thuyết #3: "Sai/thiếu tham số" — tool gọi đúng nhưng tham số không đầy đủ
-  - Phụ trách UI chat: tạo giao diện hiện tool call, input, kết quả/lỗi, version
-  - File: `artifacts/system_prompt.md`, `runs/v2_B_base_*.json`, `ui/`
+  - Phụ trách v1: sửa `system_prompt.md` theo giả thuyết #1, thêm quy tắc "Never guess" và mục Missing information
+  - Chạy v1 và so sánh với v0: +3 case (20→23/30)
+  - Đề xuất giả thuyết #2: "Tạo ticket không xác nhận" — agent gọi `create_ticket` luôn mà không hỏi xác nhận
+  - File: `artifacts/system_prompt.md`, `runs/v1_B_base_*.json`
 
 - **Quyết định, khó khăn và cách xử lý:**
-  - Khó khăn: H12 vẫn fail (agent hỏi bổ sung summary thay vì hỏi yes/no)
-  - Cách xử lý: chuyển H12 sang giả thuyết #3 cho v3 xử lý
-  - Quyết định: tập trung vào confirmation boundary, không sửa H12 ngay
+  - Khó khăn: thêm rule mà không làm agent quá cứng nhắc, vẫn trả lời được câu hỏi thường gặp
+  - Cách xử lý: thêm ví dụ cụ thể về khi nào phải clarify
+  - Quyết định: dùng `clarify` kiểu `choice` cho environment (demo/QA/dev → production/staging)
 
 - **Điều đã học:**
-  - Write action (create_ticket) cần confirmation riêng cho từng payload
-  - Confirmation cũ mất hiệu lực khi payload thay đổi
-  - UI cần hiện đủ: tool name, args, result/error, version để debug
+  - Sửa `system_prompt.md` thay đổi hành vi agent ngay mà không cần sửa code
+  - Mỗi rule mới cần cân bằng giữa ràng buộc và khả năng trả lời linh hoạt
+  - Version log giúp track từng thay đổi và so sánh công bằng
 
 - **AI/công cụ đã dùng và cách kiểm tra:**
-  - AI: dùng AI viết UI với streaming response
-  - Kiểm tra: chạy thử với nhiều loại query (bình thường, thiếu thông tin, multi-turn)
+  - AI: dùng AI để draft rule mới, sau đó tự review lại
+  - Kiểm tra: chạy lại bộ 30 case, kiểm tra `case_accuracy` tăng
 
-- **Thời điểm đã tự nộp URL repo chung trên VLearn:** 07:16:21 16/9/2026
+- **Thời điểm đã tự nộp URL repo chung trên VLearn:** 08:22:21 16/9/2026
 
 ---
